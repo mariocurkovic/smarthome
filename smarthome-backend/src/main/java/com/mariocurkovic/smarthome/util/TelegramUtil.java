@@ -1,4 +1,6 @@
-package com.mariocurkovic.smarthome;
+package com.mariocurkovic.smarthome.util;
+
+import com.mariocurkovic.smarthome.model.Message;
 
 import javax.ws.rs.core.UriBuilder;
 import java.io.IOException;

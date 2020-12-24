@@ -1,4 +1,4 @@
-package com.mariocurkovic.smarthome;
+package com.mariocurkovic.smarthome.model;
 
 import lombok.Getter;
 import lombok.Setter;

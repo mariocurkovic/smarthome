@@ -1,14 +1,26 @@
 package com.mariocurkovic.smarthome;
 
-public class App {
+import com.mariocurkovic.smarthome.model.Chat;
+import com.mariocurkovic.smarthome.model.Client;
+import com.mariocurkovic.smarthome.model.Message;
+import com.mariocurkovic.smarthome.model.Weather;
+import com.mariocurkovic.smarthome.util.WebParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+public class SimpleApp {
+
+	private static Logger logger = LoggerFactory.getLogger(SimpleApp.class);
 
 	public static void main(String[] args) {
+
+		logger.info("Starting app...");
 
 		// TODO: Read from properties
 		Chat chat = new Chat("-472738592", "smarthome", true);
 		Client sender = new Client("smarthome_mario_bot", "1442601388:AAGEOvA3K91vq9tClgFweMaKccmgzOCGlPQ");
 
-		Temperature temperature = WebParser.getLocalTemperature("Sinj");
+		Weather temperature = WebParser.getLocalWeather("Sinj");
 
 		if (temperature.getTemperature() != null) {
 			StringBuilder sb = new StringBuilder();
@@ -19,7 +31,7 @@ public class App {
 			sb.append(", Vlažnost: " + temperature.getHumidity() + "%");
 			sb.append(".");
 			Message message = new Message(chat, sender, sb.toString());
-			TelegramUtil.sendMessage(message);
+			// TelegramUtil.sendMessage(message);
 		}
 
 	}
