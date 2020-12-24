@@ -1,23 +1,11 @@
-# Compiled class file
-*.class
-
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
-*.jar
-*.war
-*.nar
-*.ear
-*.zip
-*.tar.gz
-*.rar
-
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
-hs_err_pid*
+/.idea/*
+/smarthome-backend/.idea/*
+*.iml
+/smarthome-backend/target/
+/smarthome-backend/WebRoot/WEB-INF/classes
+/smarthome-backend/WebRoot/WEB-INF/lib
+/smarthome-backend/WebRoot/META-INF/MANIFEST.MF
+*/META-INF/*
+/smarthome-backend/WebRoot/temp
+/smarthome-backend/.settings/org.eclipse.core.resources.prefs
+.DS_Store
