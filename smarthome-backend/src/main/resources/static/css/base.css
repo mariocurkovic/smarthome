@@ -1,0 +1,238 @@
+:root {
+    --color-text: white;
+    --background-color: #202945;
+}
+
+body {
+    background: url(../img/background.jpg) center;
+    display: flex;
+    align-content: center;
+    align-items: center;
+    vertical-align: middle;
+    height: 100vh;
+    overflow: hidden;
+    color: var(--color-text);
+    font-family: 'Roboto', sans-serif;
+    background-size: cover;
+}
+
+.body-container {
+    width: 100%;
+    height: 100%;
+    background: rgba(32, 41, 69, 0.95);
+    display: flex;
+    align-content: center;
+    align-items: center;
+    vertical-align: middle;
+}
+
+@media only screen and (max-device-width: 768px) {
+    .body-container {
+        display: unset;
+    }
+}
+
+#main-content {
+    margin: auto;
+    min-width: 600px;
+    background: rgba(21, 32, 40, 0.9);
+    padding: 20px 30px 30px 30px;
+    border-radius: 5px;
+    border-left: 10px solid darkolivegreen;
+    width: 50vw;
+    max-width: 800px;
+}
+
+.section-title {
+    padding: 15px 10px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.15);
+    margin-bottom: 10px;
+    font-size: 2em;
+    text-transform: uppercase;
+    font-weight: 400;
+}
+
+.section-title .flex-column {
+    display: flex;
+    justify-content: center;
+}
+
+.section-content .flex-row .flex-column {
+    margin-right: 0.5em;
+}
+
+.section-content .flex-row .flex-column:last-child {
+    margin-right: unset;
+}
+
+.toggle.btn-primary, .toggle.btn-primary:hover, .toggle .btn-primary, .toggle .btn-primary:hover {
+    background-color: darkgreen;
+    border-color: darkgreen;
+}
+
+.toggle .btn.toggle-off, .toggle .btn.toggle-on {
+    font-size: 1em;
+    font-weight: bold;
+    line-height: 25px;
+    color: var(--color-text);
+}
+
+.toggle .btn.toggle-off {
+    color: white;
+    background-color: darkgrey;
+    border-color: darkgrey;
+    text-shadow: 0px 0px 40px black;
+    border-radius: 5px;
+}
+
+.toggle .btn.toggle-handle {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.section-content {
+    font-size: 1.2em;
+}
+
+.flex-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-content .flex-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 10px;
+}
+
+.section-content .flex-row:last-child {
+    border-bottom: none;
+}
+
+.column-location {
+    background: blueviolet url(../img/location.png) no-repeat center center;
+    background-size: 1em;
+    width: 1em;
+    height: 1em;
+    border-radius: 1em;
+    padding: 1em 0.8em;
+}
+
+.column-heating {
+    background: url(../img/logo.png) no-repeat center center;
+    background-size: contain;
+    width: 60px;
+    height: 60px;
+}
+
+.column-heating-2 {
+    background: darkcyan url(../img/heating-2.png) no-repeat center center;
+    background-size: 1em;
+    width: 1em;
+    height: 1em;
+    border-radius: 1em;
+    padding: 1em 0.8em;
+}
+
+.column-temperature {
+    background: rgba(255, 255, 255, 0.2) url(../img/temperature.png) no-repeat left 0.4em center;
+    background-size: 1.2em;
+    border-radius: 10px;
+    padding: 0.6em 0.7em 0.4em 1.8em;
+    font-size: 0.8em;
+}
+
+.column-humidity {
+    background: rgba(255, 255, 255, 0.2) url(../img/humidity.png) no-repeat left 0.5em center;
+    background-size: 1.2em;
+    border-radius: 10px;
+    padding: 0.6em 0.7em 0.4em 2em;
+    font-size: 0.8em;
+}
+
+.column-pressure {
+    background: rgba(255, 255, 255, 0.2) url(../img/pressure.png) no-repeat left 0.6em center;
+    background-size: 1.2em;
+    border-radius: 10px;
+    padding: 0.6em 0.7em 0.4em 2.3em;
+    font-size: 0.8em;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.flex-10 {
+    flex: 10;
+    padding-left: 5px;
+    font-size: 1em;
+}
+
+.btn-heating {
+    padding: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    text-transform: uppercase;
+    display: none;
+}
+
+.btn-heating:focus {
+    box-shadow: none;
+}
+
+.btn-success {
+    background-color: darkgreen;
+    border-color: darkgreen;
+}
+
+.btn-heating .btn-title {
+    padding: 10px 10px 10px 15px;
+    font-size: small;
+    flex: 10;
+}
+
+.btn-heating .btn-toggle {
+    float: right;
+    width: 10px;
+    height: 30px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    margin: 2px;
+}
+
+.btn-heating.unknown .btn-title {
+    padding: 10px 10px 10px 10px;
+}
+
+.btn-heating.unknown {
+    padding-left: 10px;
+}
+
+.btn-heating.unknown .bi.bi-exclamation-triangle {
+    margin-top: -2px;
+}
+
+.modal-content {
+    background-color: rgba(21, 32, 40, 0.9);
+    padding: 20px;
+}
+
+.modal-header {
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.btn-confirm-turn-on, .btn-confirm-turn-off {
+    display: none;
+}
+
+.btn-visible {
+    display: flex;
+}
+
+.modal button.close {
+    filter: invert(1);
+}

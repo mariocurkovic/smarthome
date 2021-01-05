@@ -1,5 +1,6 @@
 package com.mariocurkovic.smarthome;
 
+import com.mariocurkovic.smarthome.util.GpioUtil;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -8,6 +9,7 @@ public class SpringBootApp {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpringBootApp.class, args);
+		GpioUtil.startGpioController();
 	}
 
 }

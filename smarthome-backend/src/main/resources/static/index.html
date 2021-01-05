@@ -1,0 +1,196 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>SMARTHOME APP</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon"/>
+
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="css/bootstrap-toggle.min.css"/>
+    <link rel="stylesheet" href="css/font-open-sans.css"/>
+    <link rel="stylesheet" href="css/base.css"/>
+
+    <script src="js/jquery-3.5.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-toggle.min.js"></script>
+
+    <script>
+
+        function updateHeatingStatus() {
+            var status = getStatus();
+            $(".btn-heating").removeClass('btn-visible');
+            $(".btn-heating." + status).addClass('btn-visible');
+        }
+
+        function getStatus() {
+            var result = 'unknown';
+            $.ajax({
+                url: 'api/heating/status/00',
+                type: 'get',
+                dataType: 'html',
+                async: false,
+                success: function (data) {
+                    if (data == "ON") {
+                        result = 'on';
+                    } else if (data == "OFF") {
+                        result = 'off';
+                    }
+                }
+            });
+            return result;
+        }
+
+        function updateTemperature(apiUrl, temperatureDivId, humidityDivId, pressureDivId) {
+            var result = false;
+            $.get(apiUrl, function (data) {
+                $('#' + temperatureDivId).html(data.temperature + '°');
+                $('#' + humidityDivId).html(data.humidity + '%');
+                $('#' + pressureDivId).html(data.pressure + 'hPa');
+            });
+            return result;
+        }
+
+        function updateLocationTemperature() {
+            updateTemperature('api/weather/Sinj', 'location-temperature', 'location-humidity', 'location-pressure');
+        }
+
+        $(document).ready(function () {
+
+            $('.btn-confirm-turn-on').click(function () {
+                var result = false;
+                $.ajax({
+                    url: 'api/heating/on/00',
+                    type: 'get',
+                    dataType: 'html',
+                    async: false,
+                    success: function (data) {
+                        if (data == "OK") {
+                            result = true;
+                        }
+                    }
+                });
+                if (result) {
+                    updateHeatingStatus();
+                    $('.modal').modal('hide');
+                }
+                // TODO: handle error messages
+            });
+
+            $('.btn-confirm-turn-off').click(function () {
+                var result = false;
+                $.ajax({
+                    url: 'api/heating/off/00',
+                    type: 'get',
+                    dataType: 'html',
+                    async: false,
+                    success: function (data) {
+                        if (data == "OK") {
+                            result = true;
+                        }
+                    }
+                });
+                if (result) {
+                    updateHeatingStatus();
+                    $('.modal').modal('hide');
+                }
+                // TODO: handle error messages
+            });
+
+            $(".btn-heating.on, .btn-heating.off").click(function () {
+                var status = getStatus();
+                var action = $(this).hasClass('on') ? 'turn-off' : 'turn-on';
+                var modalTitle = (action == 'turn-on' ? 'Uključivanje' : 'Isključivanje') + ' grijanja';
+                var modalText = 'Jeste li sigurni da želite ' + (action == 'turn-on' ? 'uključiti' : 'isključiti') + ' grijanje?';
+                if ((action == 'turn-on' && status == 'off') || (action == 'turn-off' && status == 'on')) {
+                    $('.modal .modal-title').html(modalTitle);
+                    $('.modal .modal-body p').html(modalText);
+                    $('.btn-confirm-turn-on, .btn-confirm-turn-off').removeClass('btn-visible');
+                    $('.btn-confirm-' + action).addClass('btn-visible');
+                    $('.modal').modal('show');
+                } else {
+                    updateHeatingStatus();
+                }
+            });
+
+            updateHeatingStatus();
+            updateLocationTemperature();
+
+
+        });
+
+    </script>
+
+</head>
+<body>
+<div class="body-container">
+    <div id="main-content">
+        <div class="section">
+            <div class="section-title flex-row">
+                <div class="flex-column column-heating"></div>
+                <div class="flex-column section-main-control">
+                    <button type="button" class="btn btn-success btn-heating on">
+                        <div class="btn-title">Uključeno</div>
+                        <div class="btn-toggle"></div>
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-heating off">
+                        <div class="btn-title">Isključeno</div>
+                        <div class="btn-toggle"></div>
+                    </button>
+                    <button type="button" class="btn btn-warning disabled btn-heating unknown">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-triangle" viewBox="0 0 16 16">
+                            <path d="M7.938 2.016A.13.13 0 0 1 8.002 2a.13.13 0 0 1 .063.016.146.146 0 0 1 .054.057l6.857 11.667c.036.06.035.124.002.183a.163.163 0 0 1-.054.06.116.116 0 0 1-.066.017H1.146a.115.115 0 0 1-.066-.017.163.163 0 0 1-.054-.06.176.176 0 0 1 .002-.183L7.884 2.073a.147.147 0 0 1 .054-.057zm1.044-.45a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566z"/>
+                            <path d="M7.002 12a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 5.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995z"/>
+                        </svg>
+                        <div class="btn-title">Nepoznato</div>
+                    </button>
+                </div>
+            </div>
+            <div class="section-content">
+                <div class="flex-row">
+                    <div class="flex-column column-location flex-1"></div>
+                    <div class="flex-column flex-10">Sinj</div>
+                    <div class="flex-column column-temperature" id="location-temperature">N/A</div>
+                    <div class="flex-column column-humidity" id="location-humidity">N/A</div>
+                    <div class="flex-column column-pressure" id="location-pressure">N/A</div>
+                </div>
+                <div class="flex-row">
+                    <div class="flex-column column-heating-2 flex-1"></div>
+                    <div class="flex-column flex-10">Prizemlje</div>
+                    <div class="flex-column column-temperature">N/A</div>
+                    <div class="flex-column column-humidity">N/A</div>
+                    <div class="flex-column column-pressure">N/A</div>
+                </div>
+                <div class="flex-row">
+                    <div class="flex-column column-heating-2 flex-1"></div>
+                    <div class="flex-column flex-10">Kat</div>
+                    <div class="flex-column column-temperature">N/A</div>
+                    <div class="flex-column column-humidity">N/A</div>
+                    <div class="flex-column column-pressure">N/A</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modal title</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Modal body text goes here.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success btn-confirm-turn-on">Da</button>
+                    <button type="button" class="btn btn-danger btn-confirm-turn-off">Da</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Ne</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
