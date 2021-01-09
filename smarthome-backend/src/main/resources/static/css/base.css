@@ -270,4 +270,24 @@ body {
     .btn-heating.off, .btn-heating.on, .btn-heating.unknown {
          border-radius: 20px;
      }
+    .modal.show .modal-dialog {
+        max-width: 90vw;
+        font-size: 2.5em;
+    }
+    .modal-title {
+        line-height: 2em;
+        font-size: 1.5em;
+    }
+    .modal-footer {
+        display: flex;
+        justify-content: space-around;
+    }
+    .btn-confirm-turn-on, .btn-confirm-turn-off, .modal-footer .btn-secondary {
+        font-size: 1em;
+        flex: 5;
+        margin: 20px;
+    }
+    .close {
+        font-size: 5rem;
+    }
 }
