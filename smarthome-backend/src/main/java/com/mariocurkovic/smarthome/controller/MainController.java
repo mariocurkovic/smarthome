@@ -2,6 +2,7 @@ package com.mariocurkovic.smarthome.controller;
 
 import com.mariocurkovic.smarthome.model.Weather;
 import com.mariocurkovic.smarthome.util.GpioUtil;
+import com.mariocurkovic.smarthome.util.LogUtil;
 import com.mariocurkovic.smarthome.util.WebParser;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,13 +41,21 @@ public class MainController {
 		return "Unable to process request.";
 	}
 
+	@GetMapping(value = {"/api/logs/", "/api/logs/{filename}"})
+	public String readLogs(@PathVariable(required = false) String filename) {
+		if (filename == null) {
+			return LogUtil.getListOfLogFiles();
+		}
+		return LogUtil.getLogFileContent(filename);
+	}
+
 	private boolean validatePositionParameter(String position) {
 		if (position != null) {
 			if (position.length() != 2) {
 				return false;
 			}
 			try {
-				Integer pos = Integer.parseInt(position);
+				int pos = Integer.parseInt(position);
 				return (pos >= 0 && pos < 32);
 			} catch (NumberFormatException e) {
 				return false;

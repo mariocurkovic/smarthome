@@ -12,7 +12,7 @@
     </parent>
 
     <groupId>org.example</groupId>
-    <artifactId>smarthome_backend</artifactId>
+    <artifactId>smarthome</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>

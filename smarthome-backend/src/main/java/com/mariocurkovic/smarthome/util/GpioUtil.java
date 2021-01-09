@@ -19,12 +19,11 @@ public class GpioUtil {
 
 	private static GpioController gpio = GpioFactory.getInstance();
 
-	private static List<String> autoProvisionPins = Collections.singletonList("00");
+	private static final List<String> autoProvisionPins = Collections.singletonList("00");
 
 	public static void startGpioController() {
 		logger.info("Starting GPIO controller...");
 		gpio = GpioFactory.getInstance();
-		logger.info("GPIO controller started successfully");
 		logger.info("Provisioning pins...");
 		for (String position : autoProvisionPins) {
 			provisionDigitalOutputPin(position);
@@ -36,6 +35,9 @@ public class GpioUtil {
 		if (!isOn(position)) {
 			GpioPinDigitalOutput provisionedPinByPosition = (GpioPinDigitalOutput) getProvisionedPinByPosition(position);
 			provisionedPinByPosition.low();
+			PropertiesUtil.setInitialStatus("ON");
+			PropertiesUtil.updateStartupProperties();
+			logger.info("Heating turned ON.");
 		}
 		return isOn(position);
 	}
@@ -44,6 +46,9 @@ public class GpioUtil {
 		if (isOn(position)) {
 			GpioPinDigitalOutput provisionedPinByPosition = (GpioPinDigitalOutput) getProvisionedPinByPosition(position);
 			provisionedPinByPosition.high();
+			PropertiesUtil.setInitialStatus("OFF");
+			PropertiesUtil.updateStartupProperties();
+			logger.info("Heating turned OFF.");
 		}
 		return !isOn(position);
 	}
@@ -57,9 +62,12 @@ public class GpioUtil {
 		Pin pinByPosition = getPinByPosition(position);
 		if (pinByPosition != null) {
 			logger.info("Provisioning pin GPIO_" + position + "...");
-			GpioPinDigitalOutput retVal = gpio.provisionDigitalOutputPin(pinByPosition, "GPIO_" + position, PinState.HIGH);
+			GpioPinDigitalOutput retVal = gpio.provisionDigitalOutputPin(pinByPosition,
+																		 "GPIO_" + position,
+																		 ("ON".equals(PropertiesUtil.getInitialStatus())
+																		  ? PinState.LOW
+																		  : PinState.HIGH));
 			retVal.setShutdownOptions(true, PinState.LOW);
-			logger.info("GPIO_" + position + " provisioned successfuly.");
 		} else {
 			logger.error("Error provisioning pin on position " + position);
 		}
