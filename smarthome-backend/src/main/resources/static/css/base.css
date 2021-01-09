@@ -26,12 +26,6 @@ body {
     vertical-align: middle;
 }
 
-@media only screen and (max-device-width: 768px) {
-    .body-container {
-        display: unset;
-    }
-}
-
 #main-content {
     margin: auto;
     min-width: 600px;
@@ -235,4 +229,45 @@ body {
 
 .modal button.close {
     filter: invert(1);
+}
+
+/* for mobile phones */
+@media only screen and (max-device-width: 768px) {
+    #main-content {
+        width: 100vw;
+        max-width: unset;
+        height: 100vh;
+    }
+    .section-content {
+        font-size: 3em;
+    }
+    .btn-heating .btn-title {
+        font-size: 3em;
+    }
+    .section-title .column-heating {
+        display: none;
+    }
+    .btn-heating.unknown .bi.bi-exclamation-triangle {
+        width: 50px;
+        height: 100%;
+        margin-left: 20px;
+    }
+    .section-main-control {
+        width: 100vw;
+    }
+    .btn-heating.off .btn-title, .btn-heating.on .btn-title {
+        float: left;
+        padding-left: 50px;
+    }
+    .btn-heating .btn-toggle {
+        float: right;
+        width: 30px;
+        height: 70px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        margin: 10px;
+    }
+    .btn-heating.off, .btn-heating.on, .btn-heating.unknown {
+         border-radius: 20px;
+     }
 }

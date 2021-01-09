@@ -9,3 +9,4 @@
 /smarthome-backend/WebRoot/temp
 /smarthome-backend/.settings/org.eclipse.core.resources.prefs
 .DS_Store
+/.logs/*
