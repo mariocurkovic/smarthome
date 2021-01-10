@@ -28,12 +28,12 @@ public class CronThread implements DisposableBean, Runnable {
 
 			// Turn on heating if timer reached
 			if (PropertiesUtil.isTimeForTimer()) {
-				GpioUtil.turnOn("00");
+				GpioUtil.turnOn(PropertiesUtil.getRelayPosition());
 			}
 
 			// Check for new telegram messages
 			try {
-				TelegramUtil.checkMessages(first);
+				TelegramUtil.readMessages(first);
 			} catch (Exception e) {
 				// do nothing
 			}

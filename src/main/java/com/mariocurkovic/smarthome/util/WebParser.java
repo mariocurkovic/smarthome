@@ -1,6 +1,6 @@
 package com.mariocurkovic.smarthome.util;
 
-import com.mariocurkovic.smarthome.model.Weather;
+import com.mariocurkovic.smarthome.model.MeteoInfo;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -10,8 +10,11 @@ import java.io.IOException;
 
 public class WebParser {
 
-	public static Weather getLocalWeather(String meteoStation) {
-		Weather weather = new Weather();
+	/**
+	 * returns meteo info for specific station from pljusak.com
+	 */
+	public static MeteoInfo getMeteoInfo(String meteoStation) {
+		MeteoInfo weather = new MeteoInfo();
 		if (meteoStation == null) {
 			return weather;
 		}
@@ -23,7 +26,7 @@ public class WebParser {
 				Elements columns = row.select("td");
 				if (columns.size() > 20) {
 					if (meteoStation.equals(columns.get(2).text().trim())) {
-						weather.setMeteoStation(meteoStation);
+						weather.setStation(meteoStation);
 						weather.setLastUpdatedTime(columns.get(4).text().trim());
 						weather.setTemperature(columns.get(5).text().trim());
 						weather.setPressure(columns.get(15).text().trim());

@@ -11,36 +11,38 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"offset", "length", "type"})
-public class Entity {
+@JsonPropertyOrder({"id", "title", "type", "all_members_are_administrators"})
+public class TelegramChat {
 
-	@JsonProperty("offset")
-	private Integer offset;
-	@JsonProperty("length")
-	private Integer length;
+	@JsonProperty("id")
+	private Integer id;
+	@JsonProperty("title")
+	private String title;
 	@JsonProperty("type")
 	private String type;
+	@JsonProperty("all_members_are_administrators")
+	private Boolean allMembersAreAdministrators;
 	@JsonIgnore
 	private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-	@JsonProperty("offset")
-	public Integer getOffset() {
-		return offset;
+	@JsonProperty("id")
+	public Integer getId() {
+		return id;
 	}
 
-	@JsonProperty("offset")
-	public void setOffset(Integer offset) {
-		this.offset = offset;
+	@JsonProperty("id")
+	public void setId(Integer id) {
+		this.id = id;
 	}
 
-	@JsonProperty("length")
-	public Integer getLength() {
-		return length;
+	@JsonProperty("title")
+	public String getTitle() {
+		return title;
 	}
 
-	@JsonProperty("length")
-	public void setLength(Integer length) {
-		this.length = length;
+	@JsonProperty("title")
+	public void setTitle(String title) {
+		this.title = title;
 	}
 
 	@JsonProperty("type")
@@ -51,6 +53,16 @@ public class Entity {
 	@JsonProperty("type")
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	@JsonProperty("all_members_are_administrators")
+	public Boolean getAllMembersAreAdministrators() {
+		return allMembersAreAdministrators;
+	}
+
+	@JsonProperty("all_members_are_administrators")
+	public void setAllMembersAreAdministrators(Boolean allMembersAreAdministrators) {
+		this.allMembersAreAdministrators = allMembersAreAdministrators;
 	}
 
 	@JsonAnyGetter

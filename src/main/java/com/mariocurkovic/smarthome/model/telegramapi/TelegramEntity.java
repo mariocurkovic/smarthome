@@ -11,34 +11,46 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonPropertyOrder({"update_id", "message"})
-public class Result {
+@JsonPropertyOrder({"offset", "length", "type"})
+public class TelegramEntity {
 
-	@JsonProperty("update_id")
-	private Integer updateId;
-	@JsonProperty("message")
-	private Message message;
+	@JsonProperty("offset")
+	private Integer offset;
+	@JsonProperty("length")
+	private Integer length;
+	@JsonProperty("type")
+	private String type;
 	@JsonIgnore
 	private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-	@JsonProperty("update_id")
-	public Integer getUpdateId() {
-		return updateId;
+	@JsonProperty("offset")
+	public Integer getOffset() {
+		return offset;
 	}
 
-	@JsonProperty("update_id")
-	public void setUpdateId(Integer updateId) {
-		this.updateId = updateId;
+	@JsonProperty("offset")
+	public void setOffset(Integer offset) {
+		this.offset = offset;
 	}
 
-	@JsonProperty("message")
-	public Message getMessage() {
-		return message;
+	@JsonProperty("length")
+	public Integer getLength() {
+		return length;
 	}
 
-	@JsonProperty("message")
-	public void setMessage(Message message) {
-		this.message = message;
+	@JsonProperty("length")
+	public void setLength(Integer length) {
+		this.length = length;
+	}
+
+	@JsonProperty("type")
+	public String getType() {
+		return type;
+	}
+
+	@JsonProperty("type")
+	public void setType(String type) {
+		this.type = type;
 	}
 
 	@JsonAnyGetter

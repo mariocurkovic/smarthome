@@ -1,6 +1,6 @@
 package com.mariocurkovic.smarthome.controller;
 
-import com.mariocurkovic.smarthome.model.Weather;
+import com.mariocurkovic.smarthome.model.MeteoInfo;
 import com.mariocurkovic.smarthome.util.GpioUtil;
 import com.mariocurkovic.smarthome.util.LogUtil;
 import com.mariocurkovic.smarthome.util.WebParser;
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class MainController {
 
 	@GetMapping("/api/weather/{meteoStation}")
-	public Weather getWeatherInfo(@PathVariable String meteoStation) {
-		return WebParser.getLocalWeather(meteoStation);
+	public MeteoInfo getWeatherInfo(@PathVariable String meteoStation) {
+		return WebParser.getMeteoInfo(meteoStation);
 	}
 
 	@GetMapping("/api/heating/{control}/{position}")

@@ -5,13 +5,15 @@ import com.mariocurkovic.smarthome.util.PropertiesUtil;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.io.IOException;
+
 @SpringBootApplication
 public class SpringBootApp {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SpringBootApp.class, args);
-		PropertiesUtil.loadStartupProperties();
-		GpioUtil.startGpioController();
+		PropertiesUtil.init();
+		GpioUtil.init();
 	}
 
 }

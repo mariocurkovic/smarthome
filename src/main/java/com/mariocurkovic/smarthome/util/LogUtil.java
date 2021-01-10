@@ -14,6 +14,9 @@ import java.util.stream.Collectors;
 
 public class LogUtil {
 
+	/**
+	 * returns list of available log files
+	 */
 	public static String getListOfLogFiles() {
 		try {
 			StringBuilder sb = new StringBuilder();
@@ -26,11 +29,13 @@ public class LogUtil {
 			Arrays.sort(fileNames, Collections.reverseOrder(String.CASE_INSENSITIVE_ORDER));
 			int i = 0;
 			for (String fileName : fileNames) {
-				if (i > 0) {
-					sb.append("<br/>");
+				if (fileName.contains(".log")) {
+					if (i > 0) {
+						sb.append("<br/>");
+					}
+					sb.append(fileName);
+					i++;
 				}
-				sb.append(fileName);
-				i++;
 			}
 			return sb.toString();
 		} catch (NullPointerException e) {
@@ -39,6 +44,9 @@ public class LogUtil {
 		return "No log files found.";
 	}
 
+	/**
+	 * returns log file content
+	 */
 	public static String getLogFileContent(String fileName) {
 		if (fileName == null) {
 			return "No log file found.";
@@ -54,6 +62,9 @@ public class LogUtil {
 		return "No log file found.";
 	}
 
+	/**
+	 * adds css style to printed log file
+	 */
 	private static String prependLogFileStyle() {
 		try {
 			InputStream inputStream = LogUtil.class.getClassLoader().getResourceAsStream("static/css/log.css");

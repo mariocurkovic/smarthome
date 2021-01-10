@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"id", "is_bot", "first_name", "last_name", "language_code"})
-public class From {
+public class TelegramFrom {
 
 	@JsonProperty("id")
 	private Integer id;

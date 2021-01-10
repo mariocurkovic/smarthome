@@ -13,20 +13,20 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"message_id", "from", "chat", "date", "text", "entities"})
-public class Message {
+public class TelegramMessage {
 
 	@JsonProperty("message_id")
 	private Integer messageId;
 	@JsonProperty("from")
-	private From from;
+	private TelegramFrom from;
 	@JsonProperty("chat")
-	private Chat chat;
+	private TelegramChat chat;
 	@JsonProperty("date")
 	private Integer date;
 	@JsonProperty("text")
 	private String text;
 	@JsonProperty("entities")
-	private List<Entity> entities = null;
+	private List<TelegramEntity> entities = null;
 	@JsonIgnore
 	private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -41,22 +41,22 @@ public class Message {
 	}
 
 	@JsonProperty("from")
-	public From getFrom() {
+	public TelegramFrom getFrom() {
 		return from;
 	}
 
 	@JsonProperty("from")
-	public void setFrom(From from) {
+	public void setFrom(TelegramFrom from) {
 		this.from = from;
 	}
 
 	@JsonProperty("chat")
-	public Chat getChat() {
+	public TelegramChat getChat() {
 		return chat;
 	}
 
 	@JsonProperty("chat")
-	public void setChat(Chat chat) {
+	public void setChat(TelegramChat chat) {
 		this.chat = chat;
 	}
 
@@ -81,12 +81,12 @@ public class Message {
 	}
 
 	@JsonProperty("entities")
-	public List<Entity> getEntities() {
+	public List<TelegramEntity> getEntities() {
 		return entities;
 	}
 
 	@JsonProperty("entities")
-	public void setEntities(List<Entity> entities) {
+	public void setEntities(List<TelegramEntity> entities) {
 		this.entities = entities;
 	}
 

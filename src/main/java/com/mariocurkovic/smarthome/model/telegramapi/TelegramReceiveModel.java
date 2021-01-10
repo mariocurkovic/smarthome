@@ -13,12 +13,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({"ok", "result"})
-public class ReceiveModel {
+public class TelegramReceiveModel {
 
 	@JsonProperty("ok")
 	private Boolean ok;
 	@JsonProperty("result")
-	private List<Result> result = null;
+	private List<TelegramResult> result = null;
 	@JsonIgnore
 	private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -33,12 +33,12 @@ public class ReceiveModel {
 	}
 
 	@JsonProperty("result")
-	public List<Result> getResult() {
+	public List<TelegramResult> getResult() {
 		return result;
 	}
 
 	@JsonProperty("result")
-	public void setResult(List<Result> result) {
+	public void setResult(List<TelegramResult> result) {
 		this.result = result;
 	}
 

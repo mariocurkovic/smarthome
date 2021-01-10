@@ -7,9 +7,9 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class Weather {
+public class MeteoInfo {
 
-	private String meteoStation;
+	private String station;
 	private String temperature;
 	private String lastUpdatedTime;
 	private String pressure;
