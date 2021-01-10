@@ -28,8 +28,9 @@ public class TelegramUtil {
 
 	private static Integer lastUpdateId = -1;
 	private static TelegramMessage previousMessage;
+	private static boolean isFirstMessage = true;
 
-	public static void readMessages(boolean first) {
+	public static void readMessages() {
 		HttpClient client = HttpClient.newHttpClient();
 		HttpRequest request = HttpRequest.newBuilder()
 										 .uri(URI.create("https://api.telegram.org/bot" + PropertiesUtil.getTelegramClientToken() + "/getUpdates"))
@@ -44,8 +45,9 @@ public class TelegramUtil {
 			if (receiveModel.getResult() != null && receiveModel.getResult().size() > 0 && !lastReceivedMessageUpdateId.equals(
 					lastUpdateId)) {
 
-				if (first) {
+				if (isFirstMessage) {
 					lastUpdateId = lastReceivedMessageUpdateId;
+					isFirstMessage = false;
 					return;
 				}
 
@@ -57,6 +59,7 @@ public class TelegramUtil {
 				lastUpdateId = lastReceivedMessageUpdateId;
 				handleMessage(lastReceivedMessage);
 				previousMessage = lastReceivedMessage;
+
 			}
 		} catch (IOException | InterruptedException e) {
 			// do nothing
@@ -125,7 +128,9 @@ public class TelegramUtil {
 
 		switch (receivedMessageText) {
 			case "/status":
-				sendMessage("Grijanje je " + (GpioUtil.isOn(PropertiesUtil.getRelayPosition()) ? "uključeno" : "isključeno") + ".");
+				sendMessage("Grijanje je " + (GpioUtil.isOn(PropertiesUtil.getRelayPosition())
+											  ? "uključeno"
+											  : "isključeno") + ".");
 				return;
 			case "/ukljuci":
 				boolean isTurnedOn = GpioUtil.turnOn(PropertiesUtil.getRelayPosition());
@@ -171,7 +176,7 @@ public class TelegramUtil {
 
 		switch (lvl1MessageText) {
 			case "/timer":
-				if (isMessageOlderThan(lvl1Message, 5)) {
+				if (isMessageOlderThan(lvl1Message, 60)) {
 					sendMessage("Prošlo je previše vremena od zadnje komande. Pokušaj ponovno.");
 				} else if ("/off".equals(lvl2MessageText)) {
 					PropertiesUtil.timer = null;
@@ -199,7 +204,7 @@ public class TelegramUtil {
 		if (message != null) {
 			String messageText = message.getText();
 			return ("/timer".equals(messageText) || "/status".equals(messageText) || "/ukljuci".equals(messageText) || "/iskljuci"
-					.equals(messageText) || "/temperature".equals(messageText) || "/pomoc".equals(messageText));
+					.equals(messageText) || "/meteo".equals(messageText) || "/pomoc".equals(messageText));
 		}
 		return false;
 	}
@@ -227,7 +232,6 @@ public class TelegramUtil {
 			return true;
 		}
 		long diff = (System.currentTimeMillis() / 1000L) - message.getDate();
-		logger.info("Diff: " + diff);
 		return diff > numberOfSeconds;
 	}
 

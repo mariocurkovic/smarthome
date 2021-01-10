@@ -22,7 +22,6 @@ public class CronThread implements DisposableBean, Runnable {
 	@SneakyThrows
 	@Override
 	public void run() {
-		boolean first = true;
 		isActive = true;
 		while (isActive) {
 
@@ -33,14 +32,13 @@ public class CronThread implements DisposableBean, Runnable {
 
 			// Check for new telegram messages
 			try {
-				TelegramUtil.readMessages(first);
+				TelegramUtil.readMessages();
 			} catch (Exception e) {
 				// do nothing
 			}
 
 			// Sleep 5 seconds before next check
 			Thread.sleep(5000);
-			first = false;
 		}
 	}
 

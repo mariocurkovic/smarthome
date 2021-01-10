@@ -3,7 +3,6 @@ package com.mariocurkovic.smarthome.util;
 import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -13,7 +12,6 @@ import java.io.OutputStream;
 import java.util.Calendar;
 import java.util.Properties;
 
-@Component
 public class PropertiesUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
@@ -49,7 +47,7 @@ public class PropertiesUtil {
 	 * loads app properties from resources
 	 */
 	private static void loadAppProperties() {
-		try (InputStream input = PropertiesUtil.class.getResourceAsStream("app.properties")) {
+		try (InputStream input = PropertiesUtil.class.getResourceAsStream("/app.properties")) {
 			Properties prop = new Properties();
 			if (input == null) {
 				logger.error("Unable to find app.properties");
@@ -168,4 +166,5 @@ public class PropertiesUtil {
 		}
 		return false;
 	}
+
 }
