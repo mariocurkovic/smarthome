@@ -112,10 +112,11 @@ body {
 }
 
 .column-heating {
-    background: url(../img/logo.png) no-repeat center center;
+    background: url(../img/logo.png) no-repeat center left;
     background-size: contain;
     width: 60px;
     height: 60px;
+    flex: 5;
 }
 
 .column-heating-2 {
@@ -133,6 +134,14 @@ body {
     border-radius: 10px;
     padding: 0.6em 0.7em 0.4em 1.8em;
     font-size: 0.8em;
+}
+
+.column-timer {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 5px;
+    padding: 12px;
+    font-size: 0.8em;
+    margin-left: 10px;
 }
 
 .column-humidity {
@@ -181,7 +190,7 @@ body {
 
 .btn-heating .btn-title {
     padding: 10px 10px 10px 15px;
-    font-size: small;
+    font-size: 1em;
     flex: 10;
 }
 
@@ -231,6 +240,24 @@ body {
     filter: invert(1);
 }
 
+.content-timer {
+    padding: 0px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    text-transform: uppercase;
+}
+
+.content-timer .btn-title {
+    float: right;
+    margin-left: 0.4em;
+    font-size: 0.6em;
+}
+
+.content-timer .bi.bi-clock {
+    margin-top: -2px;
+}
+
 /* for mobile phones */
 @media only screen and (max-device-width: 768px) {
     #main-content {
@@ -238,27 +265,34 @@ body {
         max-width: unset;
         height: 100vh;
     }
+
     .section-content {
         font-size: 3em;
     }
+
     .btn-heating .btn-title {
         font-size: 3em;
     }
+
     .section-title .column-heating {
         display: none;
     }
+
     .btn-heating.unknown .bi.bi-exclamation-triangle {
         width: 50px;
         height: 100%;
         margin-left: 20px;
     }
+
     .section-main-control {
         width: 100vw;
     }
+
     .btn-heating.off .btn-title, .btn-heating.on .btn-title {
         float: left;
         padding-left: 50px;
     }
+
     .btn-heating .btn-toggle {
         float: right;
         width: 30px;
@@ -267,27 +301,50 @@ body {
         background: rgba(255, 255, 255, 0.2);
         margin: 10px;
     }
+
     .btn-heating.off, .btn-heating.on, .btn-heating.unknown {
-         border-radius: 20px;
-     }
+        border-radius: 20px;
+    }
+
     .modal.show .modal-dialog {
         max-width: 90vw;
         font-size: 2.5em;
     }
+
     .modal-title {
         line-height: 2em;
         font-size: 1.5em;
     }
+
     .modal-footer {
         display: flex;
         justify-content: space-around;
     }
+
     .btn-confirm-turn-on, .btn-confirm-turn-off, .modal-footer .btn-secondary {
         font-size: 1em;
         flex: 5;
         margin: 20px;
     }
+
     .close {
         font-size: 5rem;
+    }
+
+    .column-timer {
+        border-radius: 20px;
+        padding: 10px 20px 10px 0px;
+        font-size: 0.8em;
+        margin-left: 15px;
+    }
+
+    .column-timer .bi.bi-clock {
+        width: 50px;
+        height: 100%;
+        margin-left: 20px;
+    }
+
+    .content-timer .btn-title {
+        font-size: 2em;
     }
 }

@@ -34,7 +34,7 @@ public class PropertiesUtil {
 
 	// read from startup properties
 	@Getter
-	public static String timer;
+	private static String timer;
 	@Getter
 	private static String initialStatus = "OFF";
 
@@ -165,6 +165,11 @@ public class PropertiesUtil {
 			}
 		}
 		return false;
+	}
+
+	public static void turnOffTimer() {
+		timer = null;
+		logger.info("Timer is turned off");
 	}
 
 }

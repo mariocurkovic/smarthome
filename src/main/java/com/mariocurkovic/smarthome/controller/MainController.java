@@ -3,6 +3,7 @@ package com.mariocurkovic.smarthome.controller;
 import com.mariocurkovic.smarthome.model.MeteoInfo;
 import com.mariocurkovic.smarthome.util.GpioUtil;
 import com.mariocurkovic.smarthome.util.LogUtil;
+import com.mariocurkovic.smarthome.util.PropertiesUtil;
 import com.mariocurkovic.smarthome.util.WebParser;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,21 @@ public class MainController {
 	@GetMapping("/api/weather/{meteoStation}")
 	public MeteoInfo getWeatherInfo(@PathVariable String meteoStation) {
 		return WebParser.getMeteoInfo(meteoStation);
+	}
+
+	@GetMapping("/api/timer/{command}")
+	public String manageTimer(@PathVariable String command) {
+		if ("status".equals(command)) {
+			return PropertiesUtil.getTimer() != null ? PropertiesUtil.getTimer() : "OFF";
+		} else if ("off".equals(command)) {
+			PropertiesUtil.turnOffTimer();
+			PropertiesUtil.updateStartupProperties();
+			return "OK";
+		} else if (PropertiesUtil.setTimer(command)) {
+			PropertiesUtil.updateStartupProperties();
+			return "OK";
+		}
+		return "NOK";
 	}
 
 	@GetMapping("/api/heating/{control}/{position}")
@@ -41,7 +57,7 @@ public class MainController {
 		return "Unable to process request.";
 	}
 
-	@GetMapping(value = {"/api/logs/", "/api/logs/{filename}"})
+	@GetMapping(value = {"/api/logs", "/api/logs/{filename}"})
 	public String readLogs(@PathVariable(required = false) String filename) {
 		if (filename == null) {
 			return LogUtil.getListOfLogFiles();

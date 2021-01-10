@@ -11,7 +11,7 @@ public class SpringBootApp {
 	public static void main(String[] args) {
 		PropertiesUtil.init();
 		SpringApplication.run(SpringBootApp.class, args);
-		GpioUtil.init();
+		//GpioUtil.init();
 	}
 
 }

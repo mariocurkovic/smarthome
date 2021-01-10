@@ -179,7 +179,7 @@ public class TelegramUtil {
 				if (isMessageOlderThan(lvl1Message, 60)) {
 					sendMessage("Prošlo je previše vremena od zadnje komande. Pokušaj ponovno.");
 				} else if ("/off".equals(lvl2MessageText)) {
-					PropertiesUtil.timer = null;
+					PropertiesUtil.turnOffTimer();
 					PropertiesUtil.updateStartupProperties();
 					sendMessage("Automatsko uključivanje grijanja je poništeno.");
 				} else if (lvl2MessageText.length() > 1 && PropertiesUtil.setTimer(lvl2MessageText.substring(1))) {
