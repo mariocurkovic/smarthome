@@ -233,7 +233,7 @@ body {
 }
 
 .btn-visible {
-    display: flex;
+    display: block;
 }
 
 .modal button.close {
@@ -264,6 +264,7 @@ body {
         width: 100vw;
         max-width: unset;
         height: 100vh;
+        border-left: unset;
     }
 
     .section-content {
@@ -307,6 +308,9 @@ body {
     }
 
     .modal.show .modal-dialog {
+        display: flex;
+        align-items: center;
+        height: 100vh;
         max-width: 90vw;
         font-size: 2.5em;
     }
