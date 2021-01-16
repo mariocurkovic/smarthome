@@ -9,8 +9,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class PropertiesUtil {
 
@@ -31,12 +36,20 @@ public class PropertiesUtil {
 	private static String meteoLocation;
 	@Getter
 	private static String relayPosition;
+	@Getter
+	private static List<String> adminChats = new ArrayList<>();
+	@Getter
+	private static List<String> userChats = new ArrayList<>();
 
 	// read from startup properties
 	@Getter
 	private static String timer;
 	@Getter
 	private static String initialStatus = "OFF";
+	@Getter
+	private static String registerTokenUser;
+	@Getter
+	private static String registerTokenAdmin;
 
 	public static void init() {
 		loadAppProperties();
@@ -63,6 +76,8 @@ public class PropertiesUtil {
 			telegramClientToken = prop.getProperty("app.telegram.client.token");
 			meteoLocation = prop.getProperty("app.meteo.location");
 			relayPosition = prop.getProperty("app.relay.position");
+			registerTokenUser = prop.getProperty("app.registrationToken.user");
+			registerTokenAdmin = prop.getProperty("app.registrationToken.admin");
 
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -83,6 +98,8 @@ public class PropertiesUtil {
 			if (prop.containsKey("app.timer")) {
 				setTimer(prop.getProperty("app.timer"));
 			}
+			adminChats = getChatListFromString(prop.getProperty("app.chats.admin"));
+			userChats = getChatListFromString(prop.getProperty("app.chats.user"));
 		} catch (IOException ex) {
 			// do nothing
 		}
@@ -99,6 +116,12 @@ public class PropertiesUtil {
 			}
 			if (timer != null) {
 				prop.setProperty("app.timer", timer);
+			}
+			if (adminChats != null && adminChats.size() > 0) {
+				prop.setProperty("app.chats.admin", getChatStringFromList(adminChats));
+			}
+			if (userChats != null && userChats.size() > 0) {
+				prop.setProperty("app.chats.user", getChatStringFromList(userChats));
 			}
 			prop.store(output, null);
 		} catch (IOException ex) {
@@ -128,6 +151,41 @@ public class PropertiesUtil {
 		}
 		logger.error("Invalid timer format: " + timerString + ". Required time in format 'HH:MM'");
 		return false;
+	}
+
+	/**
+	 * creates chats list from comma separated string
+	 */
+	private static List<String> getChatListFromString(String chatString) {
+		if (chatString != null) {
+			return new ArrayList<>(Arrays.asList(chatString.split(",")));
+		}
+		return new ArrayList<>();
+	}
+
+	/**
+	 * creates chats list from comma separated string
+	 */
+	private static String getChatStringFromList(List<String> chatList) {
+		if (chatList != null) {
+			return String.join(",", chatList);
+		}
+		return "";
+	}
+
+	/**
+	 * adds chat to list, either admin or user chat
+	 */
+	public static void addChat(boolean isAdminChat, String chatId) {
+		if (chatId != null) {
+			userChats.remove(chatId);
+			adminChats.remove(chatId);
+			if (isAdminChat) {
+				adminChats.add(chatId);
+			} else {
+				userChats.add(chatId);
+			}
+		}
 	}
 
 	/**
@@ -170,6 +228,10 @@ public class PropertiesUtil {
 	public static void turnOffTimer() {
 		timer = null;
 		logger.info("Timer is turned off");
+	}
+
+	public static List<String> getAllChatList() {
+		return Stream.concat(adminChats.stream(), userChats.stream()).collect(Collectors.toList());
 	}
 
 }

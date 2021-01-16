@@ -1,232 +1,159 @@
 package com.mariocurkovic.smarthome.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mariocurkovic.smarthome.model.Chat;
-import com.mariocurkovic.smarthome.model.Client;
-import com.mariocurkovic.smarthome.model.Message;
 import com.mariocurkovic.smarthome.model.MeteoInfo;
+import com.mariocurkovic.smarthome.model.telegramapi.TelegramChat;
 import com.mariocurkovic.smarthome.model.telegramapi.TelegramMessage;
-import com.mariocurkovic.smarthome.model.telegramapi.TelegramReceiveModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.UriBuilder;
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class TelegramUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(TelegramUtil.class);
 
-	private static final Chat chat = new Chat(PropertiesUtil.getTelegramChatId(), PropertiesUtil.getTelegramChatName(), true);
-	private static final Client sender = new Client(PropertiesUtil.getTelegramClientName(),
-													PropertiesUtil.getTelegramClientToken());
+	// latest message read in previous iteration
+	private static TelegramMessage latestReadMessage;
 
-	private static Integer lastUpdateId = -1;
-	private static TelegramMessage previousMessage;
-	private static boolean isFirstMessage = true;
+	// list of received messages (total)
+	private static List<TelegramMessage> receivedMessages;
+
+	// list of latest messages for each chat
+	private static Map<String, TelegramMessage> latestMessagesByChat = new HashMap<>();
 
 	public static void readMessages() {
-		HttpClient client = HttpClient.newHttpClient();
-		HttpRequest request = HttpRequest.newBuilder()
-										 .uri(URI.create("https://api.telegram.org/bot" + PropertiesUtil.getTelegramClientToken() + "/getUpdates"))
-										 .build();
-		try {
-			HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-			ObjectMapper objectMapper = new ObjectMapper();
-			TelegramReceiveModel receiveModel = objectMapper.readValue(response.body().toString(), TelegramReceiveModel.class);
-			TelegramMessage lastReceivedMessage = receiveModel.getResult().get(receiveModel.getResult().size() - 1).getMessage();
-			Integer lastReceivedMessageUpdateId = receiveModel.getResult().get(receiveModel.getResult().size() - 1).getUpdateId();
 
-			if (receiveModel.getResult() != null && receiveModel.getResult().size() > 0 && !lastReceivedMessageUpdateId.equals(
-					lastUpdateId)) {
+		receivedMessages = TelegramApi.getMessages();
 
-				if (isFirstMessage) {
-					lastUpdateId = lastReceivedMessageUpdateId;
-					isFirstMessage = false;
-					return;
-				}
+		// first iteration after starting app
+		if (latestReadMessage == null && !receivedMessages.isEmpty()) {
+			latestReadMessage = receivedMessages.get(receivedMessages.size() - 1);
+		}
 
-				String lastReceivedMessageSender = lastReceivedMessage.getFrom()
-																	  .getFirstName() + " " + lastReceivedMessage.getFrom()
-																												 .getLastName();
-				logger.info("Received new message from " + lastReceivedMessageSender + ": " + lastReceivedMessage.getText());
+		List<TelegramMessage> newMessages = filterNewMessages();
 
-				lastUpdateId = lastReceivedMessageUpdateId;
-				handleMessage(lastReceivedMessage);
-				previousMessage = lastReceivedMessage;
-
+		if (!newMessages.isEmpty()) {
+			// handle registration messages
+			List<TelegramMessage> registrationMessages = newMessages.stream().filter(TelegramCommand::isRegistrationCommand).collect(Collectors.toList());
+			for (TelegramMessage registrationMessage : registrationMessages) {
+				handleRegistrationMessage(registrationMessage);
+				setLatestMessageByChat(registrationMessage);
+				logReceivedMessage(registrationMessage);
 			}
-		} catch (IOException | InterruptedException e) {
-			// do nothing
-		} catch (NullPointerException e) {
-			logger.error("Unable to parse message.");
+			// handle regular messages from registered chats
+			List<TelegramMessage> regularMessages = newMessages.stream().filter(TelegramUtil::isMessageRegularCommandFromValidChat).collect(Collectors.toList());
+			for (TelegramMessage regularMessage : regularMessages) {
+				handleRegularMessage(regularMessage);
+				setLatestMessageByChat(regularMessage);
+				logReceivedMessage(regularMessage);
+			}
+			latestReadMessage = receivedMessages.get(receivedMessages.size() - 1);
 		}
 
 	}
 
-	/**
-	 * sends message to telegram chat
-	 */
-	public static boolean sendMessage(Message message) {
-
-		HttpClient client = HttpClient.newBuilder()
-									  .connectTimeout(Duration.ofSeconds(5))
-									  .version(HttpClient.Version.HTTP_2)
-									  .build();
-
-		UriBuilder builder = UriBuilder.fromUri("https://api.telegram.org")
-									   .path("/{token}/sendMessage")
-									   .queryParam("chat_id", message.getChat().getId())
-									   .queryParam("text", message.getText());
-
-		HttpRequest request = HttpRequest.newBuilder()
-										 .GET()
-										 .uri(builder.build("bot" + message.getSender().getToken()))
-										 .timeout(Duration.ofSeconds(5))
-										 .build();
-
-		HttpResponse<String> response = null;
-
-		try {
-			response = client.send(request, HttpResponse.BodyHandlers.ofString());
-		} catch (IOException | InterruptedException e) {
-			System.out.println("Unable to send message: " + message.toString() + ". " + e.getMessage());
-			e.printStackTrace();
-		}
-
-		if (response.statusCode() != 200) {
-			System.out.println("Unable to send message: " + message.toString() + ". Response: " + response.statusCode() + " " + response
-					.body());
-		}
-
-		return response.statusCode() == 200;
-
-	}
-
-	/**
-	 * handles incoming message
-	 */
-	private static void handleMessage(TelegramMessage receivedMessage) {
-		if (isValidLvl1Message(receivedMessage)) {
-			handleLevel1Message(receivedMessage);
-		} else if (isValidLvl2Message(previousMessage, receivedMessage)) {
-			handleLevel2Message(previousMessage, receivedMessage);
-		}
-	}
-
-	/**
-	 * handles incoming level 1 messages
-	 */
-	private static void handleLevel1Message(TelegramMessage receivedMessage) {
-
-		String receivedMessageText = receivedMessage != null ? receivedMessage.getText() : "";
-
-		switch (receivedMessageText) {
-			case "/status":
-				sendMessage("Grijanje je " + (GpioUtil.isOn(PropertiesUtil.getRelayPosition())
-											  ? "uključeno"
-											  : "isključeno") + ".");
-				return;
-			case "/ukljuci":
-				boolean isTurnedOn = GpioUtil.turnOn(PropertiesUtil.getRelayPosition());
-				sendMessage("Grijanje je " + (isTurnedOn ? "uključeno" : "isključeno") + ".");
-				return;
-			case "/iskljuci":
-				boolean isTurnedOff = GpioUtil.turnOff(PropertiesUtil.getRelayPosition());
-				sendMessage("Grijanje je " + (isTurnedOff ? "isključeno" : "uključeno") + ".");
-				return;
-			case "/meteo":
-				sendMessage(getMeteoInfoMessage(PropertiesUtil.getMeteoLocation()));
-				return;
-			case "/timer":
-				sendMessage(getTimerMessage());
-				return;
-			case "/pomoc":
-				StringBuilder sb = new StringBuilder();
-				sb.append("Dostupne komande:\n");
-				sb.append("/status - vraća status grijanja (uključeno/isključeno)\n");
-				sb.append("/ukljuci - uključuje grijanje\n");
-				sb.append("/iskljuci - isključuje grijanje\n");
-				sb.append("/meteo - vraća meteo podatke za lokaciju\n");
-				sb.append("/timer - omogućuje postavljanje automatskog uključivanja grijanja\n");
-				sb.append("/pomoc - prikazuje dostupne komande");
-				sendMessage(sb.toString());
-				return;
-			default:
-				// do nothing
-		}
-
-	}
-
-	/**
-	 * handles incoming level 2 messages
-	 */
-	private static void handleLevel2Message(TelegramMessage lvl1Message, TelegramMessage lvl2Message) {
-		if (!isValidLvl2Message(lvl1Message, lvl2Message)) {
-			return;
-		}
-
-		String lvl1MessageText = lvl1Message != null ? lvl1Message.getText() : "";
-		String lvl2MessageText = lvl2Message != null ? lvl2Message.getText() : "";
-
-		switch (lvl1MessageText) {
-			case "/timer":
-				if (isMessageOlderThan(lvl1Message, 60)) {
-					sendMessage("Prošlo je previše vremena od zadnje komande. Pokušaj ponovno.");
-				} else if ("/off".equals(lvl2MessageText)) {
-					PropertiesUtil.turnOffTimer();
-					PropertiesUtil.updateStartupProperties();
-					sendMessage("Automatsko uključivanje grijanja je poništeno.");
-				} else if (lvl2MessageText.length() > 1 && PropertiesUtil.setTimer(lvl2MessageText.substring(1))) {
-					PropertiesUtil.updateStartupProperties();
-					sendMessage("Postavljeno je automatsko uključivanje grijanja u " + PropertiesUtil.getTimer());
-				} else {
-					sendMessage(
-							"Nije uspjelo postavljanje timera automatskog uključivanja grijanja. Očekivani format vremena: '/HH:MM' (npr. /08:00)" + PropertiesUtil
-									.getTimer());
+	private static List<TelegramMessage> filterNewMessages() {
+		List<TelegramMessage> newMessages = new ArrayList<>();
+		if (latestReadMessage != null && !receivedMessages.isEmpty()) {
+			// filter only new messages
+			List<TelegramMessage> tmpNewMessages = receivedMessages.stream().filter(telegramMessage -> telegramMessage.getDate() >= latestReadMessage.getDate()).collect(Collectors.toList());
+			// get unique chat IDs from new messages
+			List<Integer> chats = tmpNewMessages.stream().map(telegramMessage -> telegramMessage.getChat().getId()).collect(Collectors.toList()).stream().distinct().collect(Collectors.toList());
+			// filter only latest messages by chat
+			for (Integer chat : chats) {
+				for (int i = tmpNewMessages.size() - 1; i > 0; i--) {
+					if (tmpNewMessages.get(i).getChat().getId().equals(chat)) {
+						newMessages.add(tmpNewMessages.get(i));
+						break;
+					}
 				}
-				return;
-			default:
-				// do nothing
-		}
-
-	}
-
-	/**
-	 * Is received message level 1
-	 */
-	private static boolean isValidLvl1Message(TelegramMessage message) {
-		if (message != null) {
-			String messageText = message.getText();
-			return ("/timer".equals(messageText) || "/status".equals(messageText) || "/ukljuci".equals(messageText) || "/iskljuci"
-					.equals(messageText) || "/meteo".equals(messageText) || "/pomoc".equals(messageText));
-		}
-		return false;
-	}
-
-	/**
-	 * Is received message level 1
-	 */
-	private static boolean isValidLvl2Message(TelegramMessage lvl1Message, TelegramMessage lvl2Message) {
-		if (lvl1Message != null && lvl2Message != null) {
-			String lvl1MessageText = lvl1Message.getText();
-			String lvl2MessageText = lvl2Message.getText();
-			if ("/timer".equals(lvl1MessageText)) {
-				return ("/off".equals(lvl2MessageText) || (lvl2MessageText.length() > 1 && PropertiesUtil.isValidTimerString(
-						lvl2MessageText.substring(1))));
 			}
 		}
-		return false;
+		return newMessages;
 	}
 
-	/**
-	 * Is message older then number of seconds provided as argument
-	 */
+	private static void handleRegistrationMessage(TelegramMessage message) {
+		// handle admin registration token message
+		if (TelegramCommand.REGISTRATION_ADMIN.equals(message.getText())) {
+			PropertiesUtil.addChat(true, String.valueOf(message.getChat().getId()));
+			PropertiesUtil.updateStartupProperties();
+			TelegramApi.sendMessage(getStartMessage(message.getChat()), message.getChat());
+		}
+		// handle user registration token message
+		if (TelegramCommand.REGISTRATION_USER.equals(message.getText())) {
+			PropertiesUtil.addChat(false, String.valueOf(message.getChat().getId()));
+			PropertiesUtil.updateStartupProperties();
+			TelegramApi.sendMessage(getStartMessage(message.getChat()), message.getChat());
+		}
+	}
+
+	private static void handleRegularMessage(TelegramMessage message) {
+		if (TelegramCommand.isFirstLevelCommand(message)) {
+			handleFirstLevelCommand(message);
+		} else if (TelegramCommand.isSecondLevelCommand(getLatestMessageByChat(message.getChat()), message)) {
+			handleSecondLevelCommand(getLatestMessageByChat(message.getChat()), message);
+		}
+	}
+
+	private static void handleFirstLevelCommand(TelegramMessage message) {
+		// handle status message
+		if (TelegramCommand.STATUS.equals(message.getText())) {
+			TelegramApi.sendMessage("Grijanje je " + (GpioUtil.isOn(PropertiesUtil.getRelayPosition()) ? "uključeno" : "isključeno") + ".", message.getChat());
+		}
+		// handle turn on message
+		if (TelegramCommand.TURN_ON.equals(message.getText())) {
+			boolean isTurnedOn = GpioUtil.turnOn(PropertiesUtil.getRelayPosition());
+			TelegramApi.sendMessage("Grijanje je " + (isTurnedOn ? "uključeno" : "isključeno") + ".", message.getChat());
+		}
+		// handle turn off message
+		if (TelegramCommand.TURN_OFF.equals(message.getText())) {
+			boolean isTurnedOff = GpioUtil.turnOff(PropertiesUtil.getRelayPosition());
+			TelegramApi.sendMessage("Grijanje je " + (isTurnedOff ? "isključeno" : "uključeno") + ".", message.getChat());
+		}
+		// handle timer message
+		if (TelegramCommand.TIMER.equals(message.getText())) {
+			TelegramApi.sendMessage(getTimerMessage(), message.getChat());
+		}
+		// handle meteo message
+		if (TelegramCommand.METEO.equals(message.getText())) {
+			TelegramApi.sendMessage(getMeteoInfoMessage(PropertiesUtil.getMeteoLocation()), message.getChat());
+		}
+		// handle help message
+		if (TelegramCommand.HELP.equals(message.getText())) {
+			TelegramApi.sendMessage(getHelpMessage(message.getChat()), message.getChat());
+		}
+	}
+
+	private static void handleSecondLevelCommand(TelegramMessage firstLevelCommand, TelegramMessage secondLevelCommand) {
+		// handle timer message
+		if (TelegramCommand.TIMER.equals(firstLevelCommand.getText())) {
+			// command timeout
+			if (isMessageOlderThan(firstLevelCommand, 60)) {
+				TelegramApi.sendMessage("Prošlo je previše vremena od zadnje komande. Pokušaj ponovno.", secondLevelCommand.getChat());
+			}
+			// turn off timer
+			else if (TelegramCommand.TIMER_OFF.equals(secondLevelCommand.getText())) {
+				PropertiesUtil.turnOffTimer();
+				PropertiesUtil.updateStartupProperties();
+				TelegramApi.sendMessage("Automatsko uključivanje grijanja je poništeno.", secondLevelCommand.getChat());
+			}
+			// update timer
+			else if (secondLevelCommand.getText().length() == 5 && PropertiesUtil.setTimer(secondLevelCommand.getText())) {
+				PropertiesUtil.updateStartupProperties();
+				TelegramApi.sendMessage("Postavljeno je automatsko uključivanje grijanja u " + PropertiesUtil.getTimer(), secondLevelCommand.getChat());
+			}
+			// error message
+			else {
+				TelegramApi.sendMessage("Nije uspjelo postavljanje timera automatskog uključivanja grijanja. Očekivani format vremena: 'HH:MM' (npr. 08:00)" + PropertiesUtil.getTimer(),
+										secondLevelCommand.getChat());
+			}
+		}
+	}
+
 	private static boolean isMessageOlderThan(TelegramMessage message, int numberOfSeconds) {
 		if (message == null) {
 			return true;
@@ -235,21 +162,6 @@ public class TelegramUtil {
 		return diff > numberOfSeconds;
 	}
 
-	/**
-	 * Returns text of previously received message if exists
-	 */
-	private static String getPreviousMessageText() {
-		return previousMessage != null ? previousMessage.getText() : null;
-	}
-
-	public static void sendMessage(String messageText) {
-		Message message = new Message(chat, sender, messageText);
-		sendMessage(message);
-	}
-
-	/**
-	 * returns meteo info message
-	 */
 	private static String getMeteoInfoMessage(String location) {
 		MeteoInfo weather = WebParser.getMeteoInfo(location);
 		if (weather.getStation() != null) {
@@ -265,14 +177,76 @@ public class TelegramUtil {
 		return "Nije moguće dohvatiti meteo podatke.";
 	}
 
-	/**
-	 * returns timer message
-	 */
 	private static String getTimerMessage() {
 		if (PropertiesUtil.getTimer() != null) {
-			return "Automatsko uključivanje je postavljeno u " + PropertiesUtil.getTimer() + ". Za promjenu, pošalji novo vrijeme u formatu '/HH:MM' (npr. /08:00) ili '/off' za isključivanje timera.";
+			return "Automatsko uključivanje je postavljeno u " + PropertiesUtil.getTimer() + ". Za promjenu, pošalji novo vrijeme u formatu 'HH:MM' (npr. 08:00) ili '/off' za isključivanje timera.";
 		}
-		return "Automatsko uključivanje još nije postavljeno. Za promjenu, pošalji novo vrijeme automatskog uključivanja u formatu '/HH:MM' (npr. /08:00).";
+		return "Automatsko uključivanje još nije postavljeno. Za promjenu, pošalji novo vrijeme automatskog uključivanja u formatu 'HH:MM' (npr. 08:00).";
+	}
+
+	private static String getStartMessage(TelegramChat chat) {
+		String prepend = "Dobrodošli u razgovor za kontrolu grijanja:\n\n";
+		return prepend + getHelpMessage(chat);
+	}
+
+	private static String getHelpMessage(TelegramChat chat) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Dostupne su sljedeće komande:\n\n");
+		// heating control commands
+		sb.append("<b>Kontrola grijanja</b>:\n");
+		sb.append("/status - vraća status grijanja (uključeno/isključeno)\n");
+		sb.append("/ukljuci - uključuje grijanje\n");
+		sb.append("/iskljuci - isključuje grijanje\n");
+		sb.append("/timer - omogućuje postavljanje automatskog uključivanja grijanja\n\n");
+		// other commands
+		sb.append("<b>Ostalo</b>:\n");
+		sb.append("/meteo - vraća meteo podatke za lokaciju\n");
+		sb.append("/pomoc - prikazuje dostupne komande");
+		// admin commands
+		if (isAdminChat(chat)) {
+			// TODO add admin commands
+		}
+		return sb.toString();
+	}
+
+	private static boolean isAdminChat(TelegramChat chat) {
+		List<String> adminChats = PropertiesUtil.getAdminChats();
+		return adminChats != null && chat != null && adminChats.contains(String.valueOf(chat.getId()));
+	}
+
+	private static void setLatestMessageByChat(TelegramMessage message) {
+		latestMessagesByChat.put(String.valueOf(message.getChat().getId()), message);
+	}
+
+	private static TelegramMessage getLatestMessageByChat(TelegramChat chat) {
+		return latestMessagesByChat.get(String.valueOf(chat.getId()));
+	}
+
+	private static void logReceivedMessage(TelegramMessage message) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(" from ").append(message.getFrom().getFirstName() != null ? message.getFrom().getFirstName() : "").append(" ");
+		sb.append((message.getFrom().getLastName() != null ? message.getFrom().getLastName() : ""));
+		logger.info("Received message" + (!"from".equals(sb.toString().trim()) ? sb.toString() : "") + ": " + message.getText());
+	}
+
+	private static boolean isMessageRegularCommandFromValidChat(TelegramMessage telegramMessage) {
+		return (TelegramCommand.isFirstLevelCommand(telegramMessage) || TelegramCommand.isSecondLevelCommand(getLatestMessageByChat(telegramMessage.getChat()),
+																											 telegramMessage)) && PropertiesUtil.getAllChatList()
+																																				.contains(String.valueOf(telegramMessage.getChat()
+																																														.getId()));
 	}
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
