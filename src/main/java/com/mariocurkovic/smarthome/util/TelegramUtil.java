@@ -16,6 +16,8 @@ public class TelegramUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(TelegramUtil.class);
 
+	private static boolean firstIteration = true;
+
 	// latest message read in previous iteration
 	private static TelegramMessage latestReadMessage;
 
@@ -27,13 +29,23 @@ public class TelegramUtil {
 
 	public static void readMessages() {
 
-		receivedMessages = TelegramApi.getMessages();
+		receivedMessages = com.mariocurkovic.smarthome.test.TelegramApi.getMessages();
 
-		// first iteration after starting app
-		if (latestReadMessage == null && !receivedMessages.isEmpty()) {
-			latestReadMessage = receivedMessages.get(receivedMessages.size() - 1);
+		// Handle old messages after app initialization
+		if (firstIteration) {
+			if (!receivedMessages.isEmpty()) {
+				latestReadMessage = receivedMessages.get(receivedMessages.size() - 1);
+			}
+			firstIteration = false;
+			return;
 		}
 
+		// Stand by if no new messages received
+		if (receivedMessages.isEmpty()) {
+			return;
+		}
+
+		// Filter only new messages from receivedMessages
 		List<TelegramMessage> newMessages = filterNewMessages();
 
 		if (!newMessages.isEmpty()) {
@@ -58,14 +70,15 @@ public class TelegramUtil {
 
 	private static List<TelegramMessage> filterNewMessages() {
 		List<TelegramMessage> newMessages = new ArrayList<>();
-		if (latestReadMessage != null && !receivedMessages.isEmpty()) {
+		int latestReadMessageTimestamp = latestReadMessage != null ? latestReadMessage.getDate() : -1;
+		if (!receivedMessages.isEmpty()) {
 			// filter only new messages
-			List<TelegramMessage> tmpNewMessages = receivedMessages.stream().filter(telegramMessage -> telegramMessage.getDate() >= latestReadMessage.getDate()).collect(Collectors.toList());
+			List<TelegramMessage> tmpNewMessages = receivedMessages.stream().filter(telegramMessage -> telegramMessage.getDate() > latestReadMessageTimestamp).collect(Collectors.toList());
 			// get unique chat IDs from new messages
 			List<Integer> chats = tmpNewMessages.stream().map(telegramMessage -> telegramMessage.getChat().getId()).collect(Collectors.toList()).stream().distinct().collect(Collectors.toList());
 			// filter only latest messages by chat
 			for (Integer chat : chats) {
-				for (int i = tmpNewMessages.size() - 1; i > 0; i--) {
+				for (int i = tmpNewMessages.size() - 1; i >= 0; i--) {
 					if (tmpNewMessages.get(i).getChat().getId().equals(chat)) {
 						newMessages.add(tmpNewMessages.get(i));
 						break;

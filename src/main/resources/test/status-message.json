@@ -1,0 +1,35 @@
+{
+  "ok": true,
+  "result": [
+    {
+      "update_id": 711681625,
+      "message": {
+        "message_id": 800,
+        "from": {
+          "id": 1498567673,
+          "is_bot": false,
+          "first_name": "Mario",
+          "last_name": "Curkovic",
+          "username": "mcurkovic",
+          "language_code": "hr"
+        },
+        "chat": {
+          "id": 1498567673,
+          "first_name": "Mario",
+          "last_name": "Curkovic",
+          "username": "mcurkovic",
+          "type": "private"
+        },
+        "date": 1618054064,
+        "text": "/status",
+        "entities": [
+          {
+            "offset": 0,
+            "length": 7,
+            "type": "bot_command"
+          }
+        ]
+      }
+    }
+  ]
+}
