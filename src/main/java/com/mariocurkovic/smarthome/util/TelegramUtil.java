@@ -29,7 +29,12 @@ public class TelegramUtil {
 
 	public static void readMessages() {
 
-		receivedMessages = com.mariocurkovic.smarthome.test.TelegramApi.getMessages();
+		receivedMessages = TelegramApi.getMessages();
+
+		// Prevent further logic in case telegram api is unreachable
+		if (receivedMessages == null) {
+			return;
+		}
 
 		// Handle old messages after app initialization
 		if (firstIteration) {
