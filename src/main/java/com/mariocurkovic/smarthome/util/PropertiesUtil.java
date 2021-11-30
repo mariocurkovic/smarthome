@@ -144,6 +144,7 @@ public class PropertiesUtil {
 	 * sets timer
 	 */
 	public static boolean setTimer(String timerString) {
+		timerString = timerString.split(" ", 2).length == 2 ? timerString.split(" ", 2)[1] : timerString;
 		if (isValidTimerString(timerString)) {
 			timer = timerString;
 			logger.info("Timer set at: " + timerString);
@@ -171,21 +172,6 @@ public class PropertiesUtil {
 			return String.join(",", chatList);
 		}
 		return "";
-	}
-
-	/**
-	 * adds chat to list, either admin or user chat
-	 */
-	public static void addChat(boolean isAdminChat, String chatId) {
-		if (chatId != null) {
-			userChats.remove(chatId);
-			adminChats.remove(chatId);
-			if (isAdminChat) {
-				adminChats.add(chatId);
-			} else {
-				userChats.add(chatId);
-			}
-		}
 	}
 
 	/**
@@ -228,10 +214,6 @@ public class PropertiesUtil {
 	public static void turnOffTimer() {
 		timer = null;
 		logger.info("Timer is turned off");
-	}
-
-	public static List<String> getAllChatList() {
-		return Stream.concat(adminChats.stream(), userChats.stream()).collect(Collectors.toList());
 	}
 
 }
