@@ -41,6 +41,7 @@ public class TelegramApi {
 			}
 		} catch (Exception e) {
 			logger.error("Unable to get updates. " + e.getMessage());
+			e.printStackTrace();
 			return null;
 		}
 		return new ArrayList<>();
