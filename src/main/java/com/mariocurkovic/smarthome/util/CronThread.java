@@ -31,11 +31,13 @@ public class CronThread implements DisposableBean, Runnable {
 			}
 
 			// Check for new telegram messages
+			/*
 			try {
 				TelegramUtil.readMessages();
 			} catch (Exception e) {
 				// do nothing
 			}
+			 */
 
 			// Sleep 5 seconds before next check
 			Thread.sleep(5000);

@@ -34,7 +34,7 @@
     }
 }
 
-@media only screen and (max-device-width: 480px) {
+@media only screen and (max-device-width: 760px) {
     .card, .modal-dialog {
         zoom: 2;
         margin: 1rem;
