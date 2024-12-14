@@ -50,6 +50,10 @@ public class PropertiesUtil {
 	private static String registerTokenUser;
 	@Getter
 	private static String registerTokenAdmin;
+	@Getter
+	private static String tuyaAccessId;
+	@Getter
+	private static String tuyaAccessSecret;
 
 	public static void init() {
 		loadAppProperties();
@@ -78,6 +82,8 @@ public class PropertiesUtil {
 			relayPosition = prop.getProperty("app.relay.position");
 			registerTokenUser = prop.getProperty("app.registrationToken.user");
 			registerTokenAdmin = prop.getProperty("app.registrationToken.admin");
+			tuyaAccessId = prop.getProperty("app.tuya.access.id");
+			tuyaAccessSecret = prop.getProperty("app.tuya.access.secret");
 
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -136,6 +142,7 @@ public class PropertiesUtil {
 		if ("ON".equals(initialStatusProperty) || "OFF".equals(initialStatusProperty)) {
 			initialStatus = initialStatusProperty;
 			logger.info("Initial status set to: " + initialStatus + "");
+			return;
 		}
 		logger.error("Invalid initial status format: " + initialStatusProperty + ". Required 'ON' or 'OFF'");
 	}

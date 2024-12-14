@@ -13,7 +13,7 @@
 
     <groupId>org.example</groupId>
     <artifactId>smarthome</artifactId>
-    <version>2.0-SNAPSHOT</version>
+    <version>3.0-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -62,6 +62,11 @@
             <artifactId>pi4j-device</artifactId>
             <version>1.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.pulsar</groupId>
+            <artifactId>pulsar-client</artifactId>
+            <version>2.11.4</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -88,5 +93,12 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>tuya-maven</id>
+            <url>https://maven-other.tuya.com/repository/maven-public/</url>
+        </repository>
+    </repositories>
 
 </project>
